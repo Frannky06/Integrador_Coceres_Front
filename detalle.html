@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Producto - Autoservicio Veloz</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="shortcut icon" href="img/Logo.png" type="image/x-icon">
+    <script defer src="js/carrito.js"></script>
+    <script defer src="js/detalle.js"></script>
+    <script defer src="js/theme.js"></script>
+    <style>
+        .detail-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .detail-image {
+            width: 400px;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-info h1 {
+            margin-top: 0;
+            font-size: 2.5rem;
+        }
+
+        .detail-info .price {
+            font-size: 2rem;
+            color: var(--accent-blue);
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .detail-info .category {
+            font-size: 1.1rem;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-actions {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .detail-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .detail-image {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/Logo.png" class="logo-img" alt="logo auto">
+        </div>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="productos.html" class="mynerve-regular">Autoservicio Veloz</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="nav-links">
+                    <a href="productos.html">Inicio</a>
+                    <a href="carrito.html">🛒</a>
+                </div>
+                <div id="username-display" class="navbar-user">Francisco</div>
+                <button id="theme-toggle"
+                    style="background: none; border: none; font-size: 20px; cursor: pointer; color:white;">🌙</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="detalle-producto-container" class="detail-container">
+            <!-- Cargando... -->
+            <p>Cargando detalles del producto...</p>
+        </div>
+        <div style="text-align: center;">
+            <a href="productos.html" class="back-btn">← Volver a productos</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Autoservicio Veloz. Todos los derechos reservados.</p>
+    </footer>
+</body>
+
+</html>

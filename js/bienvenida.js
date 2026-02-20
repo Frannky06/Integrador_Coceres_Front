@@ -35,7 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Si pasa validación
         sessionStorage.setItem("nombreUsuario", nombre);
+        sessionStorage.removeItem("ticketData"); // Limpiar cualquier ticket previo
+        localStorage.removeItem("carrito"); // Limpiar carrito previo
+
         window.location.href = "productos.html";
     });
 
+    const adminBtn = document.getElementById("admin-boton");
+    if (adminBtn) {
+        adminBtn.addEventListener("click", () => {
+            window.location.href = "http://localhost:3000/";
+        });
+    }
 });

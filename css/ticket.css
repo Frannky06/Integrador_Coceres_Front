@@ -1,0 +1,43 @@
+.ticket-page {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 20px 20px;
+}
+
+.ticket-container {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.ticket-table th,
+.ticket-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.ticket-total {
+  text-align: right;
+  margin-top: 12px;
+  font-size: 20px;
+}
+
+.ticket-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ticket-actions a {
+  text-decoration: none;
+}

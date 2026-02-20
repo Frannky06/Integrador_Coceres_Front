@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta de Satisfacción - Autoservicio Veloz</title>
+    <link rel="shortcut icon" href="img/Logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .survey-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="email"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/Logo.png" class="logo-img" alt="logo auto">
+        </div>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="productos.html" class="mynerve-regular">Autoservicio Veloz</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="survey-container">
+            <h2 style="font-family: 'Stardom';">Tu opinión nos importa</h2>
+            <form id="surveyForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="rating">¿Qué tan satisfecho estás? (1-10):</label>
+                    <div class="slider-container">
+                        <input type="range" id="rating" name="rating" min="1" max="10" value="5">
+                        <span id="ratingVal">5</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comment">Comentarios:</label>
+                    <textarea id="comment" name="comment" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="recommend" name="recommend"> ¿Nos recomendarías?
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="image">Subir una foto de tu experiencia (opcional):</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="orange-btn" id="skipBtn" style="background: #666;">Omitir</button>
+                    <button type="submit" class="orange-btn">Enviar Encuesta</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div id="modal">
+        <h3>¡Muchas gracias!</h3>
+        <p>Tu opinión nos ayuda a mejorar cada día.</p>
+        <button class="orange-btn" onclick="window.location.href='productos.html'">Volver al inicio</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Autoservicio Veloz. Todos los derechos reservados.</p>
+        <p>Alumno: Francisco</p>
+    </footer>
+
+    <script>
+        const rating = document.getElementById('rating');
+        const ratingVal = document.getElementById('ratingVal');
+        rating.oninput = () => ratingVal.innerText = rating.value;
+
+        document.getElementById('surveyForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            formData.set('recommend', document.getElementById('recommend').checked);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/surveys', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    document.getElementById('modal').style.display = 'block';
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Error al enviar la encuesta');
+                }
+            } catch (error) {
+                alert('No se pudo conectar con el servidor');
+            }
+        };
+
+        document.getElementById('skipBtn').onclick = () => {
+            window.location.href = 'productos.html';
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket - Autoservicio Veloz</title>
+  <link rel="shortcut icon" href="img/Logo.png" type="image/x-icon">
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ticket.css">
+  <script defer src="js/ticket.js"></script>
+  <script defer src="js/theme.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="img/Logo.png" class="logo-img" alt="logo auto">
+    </div>
+    <nav class="navbar">
+      <div class="logo">
+        <a href="productos.html" class="mynerve-regular">Autoservicio Veloz</a>
+      </div>
+
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a href="productos.html">Inicio</a>
+          <a href="carrito.html">🛒</a>
+        </div>
+        <div class="navbar-user">Francisco</div>
+        <button id="theme-toggle"
+          style="background: none; border: none; font-size: 20px; cursor: pointer; color:white;">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="ticket-page">
+    <h2>Ticket de compra</h2>
+    <div id="ticketContainer" class="ticket-container"></div>
+    <div class="ticket-actions">
+      <button id="btnDescargarTicket" class="orange-btn">Descargar PDF</button>
+      <a href="productos.html" class="orange-btn">Seguir comprando</a>
+      <a href="encuesta.html" class="orange-btn" style="background: #28a745;">Danos tu opinión</a>
+      <button id="btnSalir" class="orange-btn">Salir</button>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2026 Autoservicio Veloz. Todos los derechos reservados.</p>
+    <p>Alumno: Francisco</p>
+  </footer>
+</body>
+
+</html>

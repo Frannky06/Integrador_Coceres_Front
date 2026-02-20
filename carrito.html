@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/carrito.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap" rel="stylesheet">
-  <link rel="shortcut icon" href="img/logo.png">
+  <link rel="shortcut icon" href="img/Logo.png" type="image/x-icon">
   <script defer src="js/carrito.js"></script>
   <script defer src="js/theme.js"></script>
   <title>Tu Carrito - Autoservicio Veloz</title>
@@ -15,16 +14,22 @@
 
 <body>
   <header>
-    <nav>
-      <div class="nav-brand">
-        <img src="img/logo.png" alt="Logo" class="logo">
-        <span>Autoservicio Veloz</span>
+    <div class="logo-container">
+      <img src="img/Logo.png" class="logo-img" alt="logo auto">
+    </div>
+    <nav class="navbar">
+      <div class="logo">
+        <a href="productos.html" class="mynerve-regular">Autoservicio Veloz</a>
       </div>
-      <div class="barra-nav">
-        <div><a href="productos.html">Inicio</a></div>
-        <div><a href="carrito.html">Carrito</a></div>
-        <div><a href="ticket.html">Ticket</a></div>
-        <button id="theme-toggle" style="background: none; border: none; font-size: 20px; cursor: pointer;">🌙</button>
+
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a href="productos.html">Inicio</a>
+          <a href="carrito.html">🛒</a>
+        </div>
+        <div class="navbar-user">Francisco</div>
+        <button id="theme-toggle"
+          style="background: none; border: none; font-size: 20px; cursor: pointer; color:white;">🌙</button>
       </div>
     </nav>
   </header>
@@ -41,4 +46,5 @@
   </footer>
 
 </body>
+
 </html>

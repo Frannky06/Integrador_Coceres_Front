@@ -1,77 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Autos Odiados</title>
-    <!-- CDN para usar jsPDF -->
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Mynerve&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    
+    <link rel="shortcut icon" href="img/Logo.png" type="image/x-icon">
+
     <script defer src="js/main.js"></script>
     <script defer src="js/carrito.js"></script>
-    <script defer src = "js/theme.js"></script>
+    <script defer src="js/theme.js"></script>
 </head>
+
 <body>
 
     <header>
         <div class="logo-container">
             <img src="img/Logo.png" class="logo-img" alt="logo auto">
         </div>
-        <!-- Navbar -->
         <nav class="navbar">
             <div class="logo">
-                <a href="" class="mynerve-regular">Autoservicio Veloz</a>
-                <div><a href="productos.html">Inicio</a></div>
-                <div><a href="carrito.html">🛒</a></div>
-                <div><a href="ticket.html">🎫</a></div>
-
+                <a href="productos.html" class="mynerve-regular">Autoservicio Veloz</a>
             </div>
-            
-            <input type="text" placeholder="Buscar..." class="search-bar">
-    
-            <div class="cart">
-                <span>Carrito: <span id="cart-count">0</span> productos</span>
+
+            <div class="nav-actions">
+                <div class="nav-links">
+                    <a href="productos.html">Inicio</a>
+                    <a href="carrito.html">🛒</a>
+                </div>
+                <div class="navbar-user">Francisco</div>
+                <button id="theme-toggle"
+                    style="background: none; border: none; font-size: 20px; cursor: pointer; color:white;">🌙</button>
+                <input type="text" placeholder="Buscar..." class="search-bar">
             </div>
         </nav>
 
     </header>
 
-    <!-- Main Content -->
     <main>
         <section class="products-section">
             <div id="products-welcome">
                 <h2 id="saludo-usuario"></h2>
-                <h2>Nada mejor que un auto malo</h2>
+                <h2>Nada mejor que un vehiculo usado</h2>
             </div>
+
+            <div id="category-filters" class="category-filters"></div>
+
             <div class="product-grid"></div>
-        </section>
-
-
-        <!-- Cart Section -->
-        <section class="cart-section">
-            <h2>Carrito</h2>
-
-            <ul id="cart-items">
-                <p class="info-carrito">No hay productos en el carrito.</p>
-            </ul>
-
-            <div class="cart-total">
-                <p>Total: <span id="total-price">$0.00</span></p>
-                <div class="cart-buttons">
-	                <button class="hidden delete-button" id="empty-cart" onclick="vaciarCarrito()">Vaciar Carrito</button>
-                    <button class="hidden orange-btn" id="btn-imprimir">Imprimir ticket</button>
-                </div>
-            </div>
+            <div id="pagination-container" class="pagination-container"></div>
         </section>
     </main>
     <footer>
         <p>&copy; 2026 Autoservicio Veloz. Todos los derechos reservados.</p>
     </footer>
 </body>
+
 </html>

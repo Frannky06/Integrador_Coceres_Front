@@ -1,199 +1,294 @@
-// Variables del carrito
-let carrito = [];
-let objetosCarrito = document.getElementById("cart-items");
-let precioCarrito = document.getElementById("total-price");
-let contadorCarrito = document.getElementById("cart-count");
-let boton_imprimir = document.getElementById("btn-imprimir");
+const CARRITO_KEY = "carrito";
 
-// Función para mostrar el carrito
-function mostrarCarrito() {
-    // Actualizar contador
-    contadorCarrito.textContent = carrito.length;
+let carrito = cargarCarrito();
 
-    // Mostrar productos en el carrito
-    let htmlCarrito = "";
-    let total = 0;
+const objetosCarrito = document.getElementById("cart-items");
+const precioCarrito = document.getElementById("total-price");
+const contadorCarrito = document.getElementById("cart-count");
+const botonImprimir = document.getElementById("btn-imprimir");
 
-    carrito.forEach((producto, index) => {
-        htmlCarrito += `
-            <li>
-                ${producto.name} - $${producto.price}
-                <button onclick="eliminarProducto(${index})">Eliminar</button>
-            </li>
-        `;
-        total += parseInt(producto.price);
-    });
+const carritoContainer = document.getElementById("carritoContainer");
+const totalBox = document.getElementById("totalBox");
+const btnFinalizar = document.getElementById("btnFinalizar");
 
-    objetosCarrito.innerHTML = htmlCarrito;
-    precioCarrito.textContent = `$${total}`;
+let listenersRegistrados = false;
+
+function normalizarNumero(valor, fallback = 0) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? numero : fallback;
 }
 
-// Función para agregar al carrito
-function agregarCarrito(id) {
-    let frutaSeleccionada = productos.find(fruta => fruta.id === id);
-    carrito.push(frutaSeleccionada);
-    mostrarCarrito();
+function normalizarItem(item) {
+  if (!item || typeof item !== "object") return null;
+
+  const id = item.id;
+  const name = item.name ?? "Producto sin nombre";
+  const image = item.image ?? "";
+  const price = normalizarNumero(item.price, 0);
+  const quantity = Math.max(1, normalizarNumero(item.quantity, 1));
+
+  if (id === undefined || id === null) return null;
+
+  return { ...item, id, name, image, price, quantity };
 }
 
-// Función para eliminar producto
-function eliminarProducto(index) {
-    carrito.splice(index, 1);
-    mostrarCarrito();
+function cargarCarrito() {
+  try {
+    const items = JSON.parse(localStorage.getItem(CARRITO_KEY)) || [];
+    return items.map(normalizarItem).filter(Boolean);
+  } catch {
+    return [];
+  }
 }
 
-// Función para vaciar carrito
+function guardarCarrito() {
+  localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+}
+
+function totalCantidad() {
+  return carrito.reduce((acc, p) => acc + normalizarNumero(p.quantity, 1), 0);
+}
+
+function totalPrecio() {
+  return carrito.reduce(
+    (acc, p) => acc + normalizarNumero(p.price, 0) * normalizarNumero(p.quantity, 1),
+    0
+  );
+}
+
+function buscarProductoPorId(id) {
+  if (!window.productos || !Array.isArray(window.productos)) return null;
+  return window.productos.find((p) => String(p.id) === String(id)) || null;
+}
+
+function agregarCarrito(id, cantidad = 1) {
+  const producto = buscarProductoPorId(id);
+  if (!producto) {
+    console.error("Producto no encontrado para agregar al carrito:", id);
+    return;
+  }
+
+  const cantidadSegura = Math.max(1, normalizarNumero(cantidad, 1));
+  const existente = carrito.find((item) => String(item.id) === String(id));
+
+  if (existente) {
+    existente.quantity += cantidadSegura;
+  } else {
+    const item = normalizarItem({ ...producto, quantity: cantidadSegura });
+    if (!item) return;
+    carrito.push(item);
+  }
+
+  guardarCarrito();
+  renderizarCarrito();
+}
+
+function cambiarCantidad(id, delta) {
+  const item = carrito.find((p) => String(p.id) === String(id));
+  if (!item) return;
+
+  item.quantity += normalizarNumero(delta, 0);
+
+  if (item.quantity <= 0) {
+    carrito = carrito.filter((p) => String(p.id) !== String(id));
+  }
+
+  guardarCarrito();
+  renderizarCarrito();
+}
+
+function eliminarProducto(id) {
+  carrito = carrito.filter((p) => String(p.id) !== String(id));
+  guardarCarrito();
+  renderizarCarrito();
+}
+
 function vaciarCarrito() {
-    carrito = [];
-    mostrarCarrito();
+  carrito = [];
+  guardarCarrito();
+  renderizarCarrito();
 }
 
-// Imprimir tickets PDF
-boton_imprimir.addEventListener("click", imprimirTicket);
+function renderizarCarritoResumen() {
+  if (!objetosCarrito || !precioCarrito || !contadorCarrito) return;
 
-/* Gracias al CDN ya podemos usar las funcionalidades que trae jsPDF
-<!-- CDN para usar jsPDF -->
-<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>*/
+  contadorCarrito.textContent = totalCantidad();
 
-function imprimirTicket() { // Idealmente, primero se registra la venta, luego se imprime el ticket
-    console.table(carrito); // Visualizamos el carrito
+  if (carrito.length === 0) {
+    objetosCarrito.innerHTML = '<p class="info-carrito">No hay productos en el carrito.</p>';
+  } else {
+    objetosCarrito.innerHTML = carrito
+      .map(
+        (producto) => `
+        <li class="item-block">
+          <span class="item-name">${producto.name} x ${producto.quantity}</span>
+          <span>$${normalizarNumero(producto.price, 0) * normalizarNumero(producto.quantity, 1)}</span>
+          <button class="delete-button" onclick="cambiarCantidad('${producto.id}', -1)">-1</button>
+        </li>
+      `
+      )
+      .join("");
+  }
 
-    // Para registrar las ventas a posteriori, guardaremos los ids de los productos del carrito
-    let idProductos = []; // Array vacio de ids de producto
-
-    // Gracias al CDN, extraemos la clase jspdf del objeto global window
-    const { jsPDF } = window.jspdf;
-
-    // Creamos una nueva instancia del documento pdf usando al clase jsPDF
-    const doc = new jsPDF(); // Ahora doc tendra todos los metodos que le provee la herramienta jsPDF
-
-    // Definimos el margen superior de 20px en el eje y -> eje vertical, el eje x será el eje horizontal
-    let y = 20;
-
-    // Establecemos el tamaño de 18px para el primer texto
-    doc.setFontSize(18);
-
-    // Escribimos el texto "Ticket compra" en la posicion x=10, y=10 del pdf
-    doc.text("Auto-ticket de compra:", 20, y);
-
-    // Aumentamos el espacio despues del titulo
-    y += 15;
-
-    // Cambiamos el tamaño de la fuente a 12px para los productos del ticket
-    doc.setFontSize(12);
-
-    // Iteramos el carrito e imprimimos nombre y precio
-    carrito.forEach(producto => {
-
-        idProductos.push(producto.id); // Llenamos el array de ids de productos (necesario para la venta despues)
-
-        doc.text(`${producto.name} - $${producto.price}`, 30, y); // Creamos el texto por cada producto: nombre = $precio
-
-        // Incrementamos la posicion vertical para evitar solapamiento
-        y += 10;
-    });
-
-    // Calculamos el total del ticket usando reduce
-    const precioTotal = carrito.reduce((total, producto) => total + parseInt(producto.price), 0);
-
-    // Añadimos otro espacio de 5px en el eje vertical para separar el precio total de los productos
-    y += 5;
-
-    // Establecemos el tamaño de 15px para el precio total
-    doc.setFontSize(14);
-
-    // Escribimos el total del ticket en el PDF, despues del listado de productos
-    doc.text(`Total: $${precioTotal}`, 20, y);
-
-    // Imprimimos el ticket de venta
-    doc.save("ticket.pdf");
-
-    /* De cara a la defensa, la funcionalidad ticket podria concluir aca con las siguientes lineas para hacer limpieza de session
-    y redireccion
-
-    alert("Venta creada con exito");
-    sessionStorage.removeItem("nombreUsuario");
-    // sessionStorage.removeItem("carrito"); // Si guardamos el carrito en session
-    window.location.href = "index.html"
-    */
-
-    // Llamado a registrar ventas y que haga la redireccion -> fetch POST /api/sales -> luego crearemos este endpoint app.post("/api/sales")
-    registrarVenta(precioTotal, idProductos);
+  precioCarrito.textContent = `$${totalPrecio()}`;
 }
 
-// Registrar venta
-async function registrarVenta(precioTotal, idProductos) {
+function renderizarCarritoPantalla() {
+  if (!carritoContainer || !totalBox) return;
 
-    /* toLocaleString vs toISOString
+  if (carrito.length === 0) {
+    carritoContainer.innerHTML = "<p>Tu carrito está vacío.</p>";
+  } else {
+    carritoContainer.innerHTML = carrito
+      .map(
+        (p) => `
+        <div class="cart-item-card">
+          <img src="${p.image}" alt="${p.name}" class="cart-item-image">
+          <div class="cart-item-info">
+            <h3>${p.name}</h3>
+            <p>Precio unitario: $${normalizarNumero(p.price, 0)}</p>
+            <p>Subtotal: $${normalizarNumero(p.price, 0) * normalizarNumero(p.quantity, 1)}</p>
+            <div class="qty-controls">
+              <button onclick="cambiarCantidad('${p.id}', -1)">-</button>
+              <span>${normalizarNumero(p.quantity, 1)}</span>
+              <button onclick="cambiarCantidad('${p.id}', 1)">+</button>
+              <button onclick="eliminarProducto('${p.id}')">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  }
 
-        - Los métodos `toLocaleString()` y `toISOString()` de JavaScript tienen diferentes propósitos a la hora de convertir un objeto Date en una cadena. El método `toISOString()` siempre devuelve una cadena en formato ISO 8601, que representa la fecha y la hora en UTC (tiempo universal coordinado) e incluye una «Z» al final para indicar UTC. Este formato está estandarizado y es coherente independientemente de la configuración del sistema del usuario.
+  totalBox.textContent = `Total: $${totalPrecio()}`;
+}
 
-        - Por el contrario, `toLocaleString()` devuelve una cadena formateada según la configuración regional y la zona horaria del sistema del usuario o según lo especificado por los parámetros del método. Esto significa que el resultado puede variar significativamente en función de la ubicación del usuario, por ejemplo, utilizando diferentes separadores de fecha, formatos de hora o incluso diferentes nombres de días y meses. Por ejemplo, si se utiliza la configuración regional «de» (alemán), la fecha se formateará como «29.5.2020, 18:04:24», mientras que «fr» (francés) utilizará «29/05/2020, 18:04:24».
+function renderizarCarrito() {
+  renderizarCarritoResumen();
+  renderizarCarritoPantalla();
+}
 
-        - Una solución habitual para obtener la hora local en formato ISO 8601 (sin la «Z») es ajustar la fecha según la diferencia horaria antes de llamar a «toISOString()». Esto se puede hacer restando la diferencia horaria en milisegundos (obtenida mediante «getTimezoneOffset () * 60000») del valor de la hora de la fecha. A continuación, la cadena resultante se puede modificar para eliminar la «Z» final si es necesario. Alternativamente, el uso de una configuración regional como «sv» (Suecia) con «toLocaleString()» produce un formato similar al ISO 8601, aunque utiliza un espacio en lugar de «T» entre la fecha y la hora, lo que sigue siendo válido según la RFC 3339.
-    */
+function construirTicketData() {
+  return {
+    user_name: sessionStorage.getItem("nombreUsuario") || "Cliente",
+    // Quitamos user_id del front porque el back/DB se encarga
+    date: new Date().toISOString(), // Formato ISO para evitar problemas de parseo
+    products: carrito.map(p => p.id), // El back espera un array de IDs en 'products'
+    total_price: totalPrecio(), // El back espera 'total_price'
+    items: carrito, // Mantenemos items para el renderizado del ticket local
+  };
+}
 
-   // Ya que el formato fecha no es valido para timestamp en SQL, tenemos que formatearlo
-   const fecha = new Date()
-    .toLocaleString("sv-SE", { hour12: false })
-    .replace("T", " ");
+async function finalizarCompra() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío");
+    return;
+  }
 
-    console.log(fecha);
+  const ticketData = construirTicketData();
 
-    // Construimos el objeto con informacion para mandarle al endpoint (previo parseo a JSON)
-    const data = {
-        date: fecha, // Recordar que si en su BBDD tienen un valor generado automaticamente, no hace falta enviar esto
-        total_price: precioTotal,
-        user_name: nombreUsuario,
-        products: idProductos
-    }
-
+  try {
     const response = await fetch("http://localhost:3000/api/sales", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        date: ticketData.date,
+        total_price: ticketData.total_price,
+        user_name: ticketData.user_name,
+        // No enviamos user_id, dejamos que el back lo maneje
+        products: ticketData.products
+      }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al registrar la venta");
+    }
 
     const result = await response.json();
+    console.log("Venta registrada:", result);
 
+    // Guardamos los datos para la pantalla de ticket
+    sessionStorage.setItem("ticketData", JSON.stringify({
+      ...ticketData,
+      id: result.saleId,
+      saleNumber: result.saleNumber, // Guardamos el Nro de venta autoincremental
+      date: new Date(ticketData.date).toLocaleString() // Formateamos para mostrar
+    }));
 
-    if(response.ok) {
-        console.log(response);
-        alert(result.message);
+    // Vaciamos el carrito local
+    vaciarCarrito();
 
-        // Limpieza de variables en sesion y redireccion para resetear la app
-        sessionStorage.removeItem("nombreUsuario");
-        // sessionStorage.removeItem("carrito"); // Si guardamos el carrito en session
-        window.location.href = "index.html"
-    } else {
-        alert(result.message);
-    }
+    // Redirigimos
+    window.location.href = "ticket.html";
 
-
-    // TO DO, tenemos que crear el endpoint /api/sales
-
-
-
-    /*
-    // Una vez que terminasemos de registrar la venta -> ORDEN IDEAL 1. Venta -> 2. Ticket
-    alert("Venta creada con exito");
-    sessionStorage.removeItem("nombreUsuario");
-    // sessionStorage.removeItem("carrito"); // Si guardamos el carrito en session
-    window.location.href = "index.html"
-    */
+  } catch (error) {
+    console.error("Error en la compra:", error);
+    alert("Hubo un problema al procesar tu compra: " + error.message);
+  }
 }
 
-// Inicializar eventos del carrito
+function irATicket() {
+  finalizarCompra();
+}
+
+function imprimirTicket() {
+  if (!window.jspdf) {
+    irATicket();
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const ticketData = construirTicketData();
+
+  let y = 20;
+  doc.setFontSize(18);
+  doc.text("Auto-ticket de compra:", 20, y);
+  y += 12;
+  doc.setFontSize(12);
+  doc.text(`Cliente: ${ticketData.user_name}`, 20, y);
+  y += 8;
+  doc.text(`Fecha: ${ticketData.date}`, 20, y);
+  y += 12;
+
+  ticketData.items.forEach((item) => {
+    const subtotal = normalizarNumero(item.price, 0) * normalizarNumero(item.quantity, 1);
+    doc.text(`${item.name} x${item.quantity} - $${subtotal}`, 20, y);
+    y += 8;
+  });
+
+  y += 6;
+  doc.setFontSize(14);
+  doc.text(`Total: $${ticketData.total}`, 20, y);
+
+  doc.save("ticket.pdf");
+}
+
 function initCarrito() {
-    if (boton_imprimir) {
-        boton_imprimir.addEventListener("click", imprimirTicket);
-    }
+  renderizarCarrito();
+
+  if (listenersRegistrados) return;
+
+  if (botonImprimir) {
+    botonImprimir.addEventListener("click", irATicket);
+  }
+
+  if (btnFinalizar) {
+    btnFinalizar.addEventListener("click", irATicket);
+  }
+
+  listenersRegistrados = true;
 }
 
-// Hacer funciones disponibles globalmente
 window.agregarCarrito = agregarCarrito;
 window.eliminarProducto = eliminarProducto;
 window.vaciarCarrito = vaciarCarrito;
+window.cambiarCantidad = cambiarCantidad;
 window.initCarrito = initCarrito;
+window.imprimirTicket = imprimirTicket;
+
+initCarrito();
